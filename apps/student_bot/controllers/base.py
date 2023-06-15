@@ -2,7 +2,7 @@ import telebot
 from telebot.types import KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, \
     ReplyKeyboardRemove
 
-from student_bot.constants import BotUserSteps, CallbackData
+from student_bot.constants import StudentBotSteps, CallbackData
 from student_bot.models import StudentTelegramUser
 from student_bot.strings import messages
 
@@ -27,7 +27,7 @@ class BaseController:
         else:
             return code
 
-    def set_step(self, step: BotUserSteps):
+    def set_step(self, step: StudentBotSteps):
         user = self.user
         user.step = step
         user.save()

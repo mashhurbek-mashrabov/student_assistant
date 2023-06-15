@@ -4,7 +4,7 @@ STUDENT_BOT_TOKEN = os.environ.get('STUDENT_BOT_TOKEN')
 STUDENT_WEBHOOK_URL = os.environ.get('STUDENT_WEBHOOK_URL')
 
 
-class BotUserSteps:
+class StudentBotSteps:
     LISTING_LANGUAGE = 1
 
 
