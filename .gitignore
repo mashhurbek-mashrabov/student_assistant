@@ -1,0 +1,14 @@
+/media/
+db.sqlite3
+venv/
+.idea
+.env
+__pycache__
+*.pyc
+static/
+vol/
+media/
+/.envs/
+/volumes
+celerybeat-schedule*
+logs/
