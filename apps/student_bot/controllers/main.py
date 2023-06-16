@@ -74,7 +74,8 @@ class BotController(BaseController):
     def main_menu(self, text: str = None, edit_message: bool = False):
         markup = self.reply_markup()
         markup.add(KeyboardButton(text=self.t('fill data')))
-        markup.add(KeyboardButton(text=f"{self.t('language flag')} {self.t('change language')}"))
+        markup.add(KeyboardButton(text=self.t('my data')),
+        KeyboardButton(text=f"{self.t('language flag')} {self.t('change language')}"))
         if edit_message:
             self.delete_message(message_id=self.callback_query_id)
         self.send_message(message_text=text or self.t('main menu'), reply_markup=markup)
@@ -292,3 +293,35 @@ class BotController(BaseController):
             self.send_message(message_code='sent request to join the group')
         self.main_menu()
 
+    def get_full_data(self, text: str = None):
+        text = self.get_full_data_text()
+        if len(text) == 0:
+            self.main_menu(text=self.t('your data is empty'))
+            return
+        if self.user.photo_id:
+            self.bot.send_photo(chat_id=self.chat_id, photo=self.user.photo_id, caption=text, parse_mode='HTML')
+        else:
+            self.main_menu(text)
+
+    def get_full_data_text(self):
+        text = ""
+        user = self.user
+        if user.full_name:
+            text += self.t('full name title') + user.full_name + "\n"
+        if user.phone_number:
+            text += self.t('phone number title') + user.phone_number + "\n"
+        if user.permanent_address:
+            text += self.t('address title') + user.permanent_address + "\n"
+        if user.rental_address:
+            text += self.t('rental address title') + user.rental_address + "\n"
+        if user.passport_data:
+            text += self.t('passport data title') + user.passport_data + "\n\n"
+        if user.father_data:
+            text += self.t('father data title') + user.father_data + "\n"
+        if user.father_phone_number:
+            text += self.t('father phone number title') + user.father_phone_number + "\n\n"
+        if user.mother_data:
+            text += self.t('mother data title') + user.mother_data + "\n"
+        if user.mother_phone_number:
+            text += self.t('mother phone number title') + user.mother_phone_number + "\n\n"
+        return text

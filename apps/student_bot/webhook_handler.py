@@ -45,6 +45,8 @@ def message_handler(message):
             controller.main_menu()
         elif message_text == controller.t('back button'):
             controller.back_reply_button_handler()
+        elif message_text == controller.t("my data"):
+            controller.get_full_data()
         elif message_text == f"{controller.t('language flag')} {controller.t('change language')}":
             controller.list_language()
         elif message_text == controller.t('fill data'):
