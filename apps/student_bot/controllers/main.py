@@ -27,7 +27,7 @@ class BotController(BaseController):
         if step == StudentBotSteps.GROUP_LIST:
             self.get_full_name()
         elif step == StudentBotSteps.GET_PERMANENT_ADDRESS:
-            if hasattr(self.user, 'membership') and self.user.membership.status == MembershipStatus.ACTIVE:
+            if self.user.memberships.all().exists() and self.user.memberships.all().first().status == MembershipStatus.ACTIVE:
                 self.get_full_name()
                 return
             self.group_list()
@@ -97,7 +97,7 @@ class BotController(BaseController):
             return
         self.user.full_name = full_name
         self.user.save()
-        if hasattr(self.user, 'membership') and self.user.membership.status == MembershipStatus.ACTIVE:
+        if self.user.memberships.all().exists() and self.user.memberships.all().first().status == MembershipStatus.ACTIVE:
             self.get_permanent_address()
             return
         self.group_list()
@@ -119,7 +119,7 @@ class BotController(BaseController):
             self.group_list()
             return
         group = group.first()
-        if not hasattr(self.user, 'membership'):
+        if not self.user.memberships.all().exists():
             Membership.objects.create(student=self.user, group=group, status=MembershipStatus.PENDING)
         else:
             self.user.membership.group = group
@@ -276,7 +276,11 @@ class BotController(BaseController):
         else:
             self.get_mother_phone_number(text=self.t('enter correct phone number'))
             return
-        self.get_photo()
+        self.send_message(message_code='your information saved')
+        if self.user.memberships.all().exists() and self.user.memberships.all().first().status == MembershipStatus.PENDING:
+            send_request_to_join_group.delay(self.user.id)
+            self.send_message(message_code='sent request to join the group')
+        self.main_menu()
 
     def get_photo(self, text: str = None):
         markup = self.reply_markup()
@@ -288,7 +292,7 @@ class BotController(BaseController):
         self.user.photo_id = self.message.photo[0].file_id
         self.user.save()
         self.send_message(message_code='your information saved')
-        if hasattr(self.user, 'membership') and self.user.membership.status == MembershipStatus.PENDING:
+        if self.user.memberships.all().exists() and self.user.memberships.all().first().status == MembershipStatus.PENDING:
             send_request_to_join_group.delay(self.user.id)
             self.send_message(message_code='sent request to join the group')
         self.main_menu()

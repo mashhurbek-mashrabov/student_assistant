@@ -148,12 +148,15 @@ class BotController(BaseController):
     def approve_student_membership(self):
         student_id = self.callback_data.split(':')[1]
         student = StudentTelegramUser.objects.get(id=student_id)
-        student.membership.status = MembershipStatus.ACTIVE
-        student.membership.save()
+        membership = student.membership
+        membership.status = MembershipStatus.ACTIVE
+        membership.save()
         markup = self.inline_markup()
         markup.add(InlineKeyboardButton(text=self.messages('approved'), callback_data='None'))
-        self.edit_message(message_id=self.callback_query_id, message=self.message.message.html_text, reply_markup=markup)
-        s_bot.send_message(chat_id=student.chat_id, text=self.t('your request approved', student.language).format(group_name=student.membership.group.name), parse_mode='HTML')
+        self.edit_message(message_id=self.callback_query_id, message=self.message.message.html_text,
+                          reply_markup=markup)
+        s_bot.send_message(chat_id=student.chat_id, text=self.t('your request approved', student.language).format(
+            group_name=student.membership.group.name), parse_mode='HTML')
 
     def reject_student_membership(self):
         student_id = self.callback_data.split(':')[1]
@@ -162,5 +165,57 @@ class BotController(BaseController):
         student.membership.save()
         markup = self.inline_markup()
         markup.add(InlineKeyboardButton(text=self.messages('rejected'), callback_data='None'))
-        self.edit_message(message_id=self.callback_query_id, message=self.message.message.html_text, reply_markup=markup)
-        s_bot.send_message(chat_id=student.chat_id, text=self.t('your request rejected', student.language).format(group_name=student.membership.group.name), parse_mode='HTML')
+        self.edit_message(message_id=self.callback_query_id, message=self.message.message.html_text,
+                          reply_markup=markup)
+        s_bot.send_message(chat_id=student.chat_id, text=self.t('your request rejected', student.language).format(
+            group_name=student.membership.group.name), parse_mode='HTML')
+
+    def get_student_list(self):
+        group_name = self.message_text
+        group = self.user.student_groups.filter(name=group_name)
+        if not group.exists():
+            self.get_groups()
+            return
+        group = group.first()
+        members = group.students.filter(status=MembershipStatus.ACTIVE)
+        markup = self.inline_markup()
+        for i in members:
+            markup.add(InlineKeyboardButton(text=i.student.full_name, callback_data=f'student:{i.student.id}'))
+        if not members.exists():
+            markup.add(InlineKeyboardButton(text=self.t('no students'), callback_data='None'))
+        markup.add(self.main_menu_inline_button)
+        self.send_message(message_code='student list', reply_markup=markup)
+
+    def get_student_details(self):
+        student_id = self.callback_data.split(':')[1]
+        student = StudentTelegramUser.objects.get(id=student_id)
+        text = self.get_full_data_text(student)
+        if len(text) == 0:
+            self.send_message(message_code=('student data is empty'))
+            return
+        if student.photo_id:
+            self.bot.send_photo(chat_id=self.user.chat_id, photo=student.photo_id, caption=text, parse_mode='HTML')
+        else:
+            self.send_message(message_text=text)
+
+    def get_full_data_text(self, user):
+        text = ""
+        if user.full_name:
+            text += self.t('full name title') + user.full_name + "\n"
+        if user.phone_number:
+            text += self.t('phone number title') + user.phone_number + "\n"
+        if user.permanent_address:
+            text += self.t('address title') + user.permanent_address + "\n"
+        if user.rental_address:
+            text += self.t('rental address title') + user.rental_address + "\n"
+        if user.passport_data:
+            text += self.t('passport data title') + user.passport_data + "\n\n"
+        if user.father_data:
+            text += self.t('father data title') + user.father_data + "\n"
+        if user.father_phone_number:
+            text += self.t('father phone number title') + user.father_phone_number + "\n\n"
+        if user.mother_data:
+            text += self.t('mother data title') + user.mother_data + "\n"
+        if user.mother_phone_number:
+            text += self.t('mother phone number title') + user.mother_phone_number + "\n\n"
+        return text

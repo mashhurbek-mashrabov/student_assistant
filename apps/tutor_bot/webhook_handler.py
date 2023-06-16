@@ -60,6 +60,8 @@ def message_handler(message):
             controller.set_full_name()
         elif user_step == TutorBotSteps.GET_GROUP_NAME:
             controller.create_student_group()
+        elif user_step == TutorBotSteps.GET_GROUPS:
+            controller.get_student_list()
     except:
         send_exception(traceback.format_exc(), 'start_handler', user=message.from_user)
 
@@ -82,11 +84,14 @@ def callback_handler(message):
             controller.approve_student_membership()
         elif callback_data.startswith(TutorCallbackData.reject_student):
             controller.reject_student_membership()
+        elif callback_data.startswith('student'):
+            controller.get_student_details()
         elif callback_data == TutorCallbackData.exception:
             markup = InlineKeyboardMarkup(row_width=2)
             markup.add(InlineKeyboardButton(messages.get('true icon'), callback_data='None'))
             bot.edit_message_text(chat_id=EXCEPTION_CHANNEL_ID, text=message.message.text, reply_markup=markup, message_id=controller.callback_query_id)
     except:
+        print(traceback.format_exc())
         send_exception(traceback.format_exc(), 'callback_handler', user=message.from_user)
 
 

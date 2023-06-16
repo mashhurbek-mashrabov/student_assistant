@@ -32,10 +32,13 @@ class StudentTelegramUser(BaseModel):
     def joined_at(self):
         return f'{self.date.strftime("%X")} {self.date.strftime("%x")}'
 
+    @property
+    def membership(self):
+        return self.memberships.all().first()
+
 
 class Membership(BaseModel):
-    student = models.OneToOneField(StudentTelegramUser, on_delete=models.CASCADE, related_name='membership',
-                                   parent_link=True)
+    student = models.ForeignKey(StudentTelegramUser, on_delete=models.CASCADE, related_name='memberships')
     group = models.ForeignKey('tutor_bot.StudentGroup', on_delete=models.CASCADE, related_name='students')
     status = models.IntegerField(choices=MembershipStatus.choices, default=MembershipStatus.NEW)
 
