@@ -288,7 +288,7 @@ class BotController(BaseController):
         self.user.save()
         self.send_message(message_code='your information saved')
         if hasattr(self.user, 'membership') and self.user.membership.status == MembershipStatus.PENDING:
-            send_request_to_join_group.dalay(self.user.id)
+            send_request_to_join_group.delay(self.user.id)
             self.send_message(message_code='sent request to join the group')
         self.main_menu()
 

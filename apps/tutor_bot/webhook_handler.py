@@ -78,6 +78,10 @@ def callback_handler(message):
             controller.approve_tutor()
         elif callback_data.startswith(TutorCallbackData.reject_tutor):
             controller.reject_tutor()
+        elif callback_data.startswith(TutorCallbackData.approve_student):
+            controller.approve_student_membership()
+        elif callback_data.startswith(TutorCallbackData.reject_student):
+            controller.reject_student_membership()
         elif callback_data == TutorCallbackData.exception:
             markup = InlineKeyboardMarkup(row_width=2)
             markup.add(InlineKeyboardButton(messages.get('true icon'), callback_data='None'))

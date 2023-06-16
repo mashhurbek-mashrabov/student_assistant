@@ -1,10 +1,13 @@
 from telebot.types import KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 
 from common.constants import LanguageChoices, MODERATOR_CHANNEL_ID
+from student_bot.constants import MembershipStatus
+from student_bot.models import StudentTelegramUser
 from tutor_bot.constants import TutorBotSteps, TutorStatus
 from tutor_bot.controllers.base import BaseController
 from tutor_bot.models import TutorTelegramUser
 from tutor_bot.tasks import send_tutor_verification_to_admin
+from student_bot.loader import bot as s_bot
 
 
 class BotController(BaseController):
@@ -142,11 +145,22 @@ class BotController(BaseController):
         self.user.student_groups.create(name=group_name)
         self.get_groups(text=self.t('saved'))
 
-    def viewed_exception(sellf, text, callback_query_id):
-        markup = InlineKeyboardMarkup(row_width=2)
-        markup.add(InlineKeyboardButton(messages.get('confirm emoji'), callback_data='None'))
-        try:
-            bot.edit_message_text(chat_id=EXCEPTION_CHANNEL_ID, text=text, reply_markup=markup,
-                                  message_id=callback_query_id)
-        except ApiException:
-            return
+    def approve_student_membership(self):
+        student_id = self.callback_data.split(':')[1]
+        student = StudentTelegramUser.objects.get(id=student_id)
+        student.membership.status = MembershipStatus.ACTIVE
+        student.membership.save()
+        markup = self.inline_markup()
+        markup.add(InlineKeyboardButton(text=self.messages('approved'), callback_data='None'))
+        self.edit_message(message_id=self.callback_query_id, message=self.message.message.html_text, reply_markup=markup)
+        s_bot.send_message(chat_id=student.chat_id, text=self.t('your request approved', student.language).format(group_name=student.membership.group.name), parse_mode='HTML')
+
+    def reject_student_membership(self):
+        student_id = self.callback_data.split(':')[1]
+        student = StudentTelegramUser.objects.get(id=student_id)
+        student.membership.status = MembershipStatus.REJECTED
+        student.membership.save()
+        markup = self.inline_markup()
+        markup.add(InlineKeyboardButton(text=self.messages('rejected'), callback_data='None'))
+        self.edit_message(message_id=self.callback_query_id, message=self.message.message.html_text, reply_markup=markup)
+        s_bot.send_message(chat_id=student.chat_id, text=self.t('your request rejected', student.language).format(group_name=student.membership.group.name), parse_mode='HTML')

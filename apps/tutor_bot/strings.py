@@ -43,7 +43,9 @@ messages = {
         'get group name': "Guruh nomini kiriting.\n<i>Masalan: 651-19</i>",
         'group name is too short': "⚠️ Guruh nomi juda qisqa.",
         'group name is too long': "⚠️ Guruh nomi juda uzun.",
-        'request join group': "Ushbu talaba <b>{group_name}</b> guruhga qo'shilmoqchi. Uni tasdiqlaysizmi?\n<a href='{link}'>{student_name}</a>"
+        'request join group': "Ushbu talaba <b>{group_name}</b> guruhga qo'shilmoqchi. Uni tasdiqlaysizmi?\n<a href='{link}'>{student_name}</a>",
+        'your request approved': "🎉 Sizning {group_name} guruhga qo'shilish to'g'risidagi so'rovingiz tutor tomonidan tasdiqlandi",
+        'your request rejected': "😔 Sizning {group_name} guruhga qo'shilish to'g'risidagi so'rovingiz tutor tomonidan rad etildi.",
     },
     LanguageChoices.ENGLISH: {
         'language flag': '🇺🇸',
@@ -70,6 +72,8 @@ messages = {
         'get group name': "Enter group name.\n<i>Example: 651-19</i>",
         'group name is too short': "⚠️ Group name is too short",
         'group name is too long': "⚠️ Group name is too long",
-        'request join group': "This student wants to join to <b>{group_name}</b>. Do you approve?\n<a href='{link}'>{student_name}</a>"
+        'request join group': "This student wants to join to <b>{group_name}</b>. Do you approve?\n<a href='{link}'>{student_name}</a>",
+        'your request approved': "🎉 Your request to join {group_name} has been approved by a tutor.",
+        'your request rejected': "😔 Your request to join {group_name} has been rejected by a tutor.",
     },
 }
