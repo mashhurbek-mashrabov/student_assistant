@@ -2,7 +2,7 @@ import telebot
 from telebot.types import KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, \
     ReplyKeyboardRemove
 
-from student_bot.constants import StudentBotSteps, CallbackData
+from student_bot.constants import StudentBotSteps, StudentCallbackData
 from student_bot.models import StudentTelegramUser
 from student_bot.strings import messages
 
@@ -107,7 +107,7 @@ class BaseController:
 
     @property
     def main_menu_inline_button(self):
-        return InlineKeyboardButton(self.t('main menu'), callback_data=CallbackData.main_menu_button)
+        return InlineKeyboardButton(self.t('main menu'), callback_data=StudentCallbackData.main_menu_button)
 
     @property
     def back_reply_button(self):
@@ -115,7 +115,7 @@ class BaseController:
 
     @property
     def back_inline_button(self):
-        return InlineKeyboardButton(self.t('back button'), callback_data=CallbackData.back_button)
+        return InlineKeyboardButton(self.t('back button'), callback_data=StudentCallbackData.back_button)
 
     @property
     def skip_reply_button(self):
@@ -123,7 +123,7 @@ class BaseController:
 
     @property
     def skip_inline_button(self):
-        return InlineKeyboardButton(text=self.t('skip'), callback_data=CallbackData.skip)
+        return InlineKeyboardButton(text=self.t('skip'), callback_data=StudentCallbackData.skip)
 
     @property
     def cancel_reply_button(self):

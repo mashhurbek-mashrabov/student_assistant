@@ -21,6 +21,8 @@ class TutorCallbackData:
     exception = 'exception'
     approve_tutor = 'approve_tutor'
     reject_tutor = 'reject_tutor'
+    approve_student = 'approve_student'
+    reject_student = 'reject_student'
 
 
 class TutorStatus(models.IntegerChoices):

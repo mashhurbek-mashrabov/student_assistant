@@ -3,12 +3,16 @@ import traceback
 import telebot
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from telebot.callback_data import CallbackData
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from telebot.util import content_type_media
 
+from common.constants import EXCEPTION_CHANNEL_ID
 from tutor_bot.constants import TutorBotSteps, TutorCallbackData
 from tutor_bot.controllers.main import BotController
 from tutor_bot.loader import bot
 from common.utils import send_exception
+from tutor_bot.strings import messages
 
 
 @csrf_exempt
@@ -74,6 +78,10 @@ def callback_handler(message):
             controller.approve_tutor()
         elif callback_data.startswith(TutorCallbackData.reject_tutor):
             controller.reject_tutor()
+        elif callback_data == TutorCallbackData.exception:
+            markup = InlineKeyboardMarkup(row_width=2)
+            markup.add(InlineKeyboardButton(messages.get('true icon'), callback_data='None'))
+            bot.edit_message_text(chat_id=EXCEPTION_CHANNEL_ID, text=message.message.text, reply_markup=markup, message_id=controller.callback_query_id)
     except:
         send_exception(traceback.format_exc(), 'callback_handler', user=message.from_user)
 

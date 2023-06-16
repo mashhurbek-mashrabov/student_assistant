@@ -1,4 +1,4 @@
-from telebot.types import KeyboardButton, InlineKeyboardButton
+from telebot.types import KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 
 from common.constants import LanguageChoices, MODERATOR_CHANNEL_ID
 from tutor_bot.constants import TutorBotSteps, TutorStatus
@@ -141,3 +141,12 @@ class BotController(BaseController):
             return
         self.user.student_groups.create(name=group_name)
         self.get_groups(text=self.t('saved'))
+
+    def viewed_exception(sellf, text, callback_query_id):
+        markup = InlineKeyboardMarkup(row_width=2)
+        markup.add(InlineKeyboardButton(messages.get('confirm emoji'), callback_data='None'))
+        try:
+            bot.edit_message_text(chat_id=EXCEPTION_CHANNEL_ID, text=text, reply_markup=markup,
+                                  message_id=callback_query_id)
+        except ApiException:
+            return

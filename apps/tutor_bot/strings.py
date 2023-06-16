@@ -7,7 +7,6 @@ messages = {
     'uzbek': "🇺🇿 O'zbek",
     'english': "🇺🇸 English",
     "selected language doesn't exist": "👇 Ilitimos quyidagi mavjud tillardan birini tanlang:",
-    "saved your language": '',
 
     'person emoji': '👤',
     'step emoji': '👣',
@@ -44,6 +43,7 @@ messages = {
         'get group name': "Guruh nomini kiriting.\n<i>Masalan: 651-19</i>",
         'group name is too short': "⚠️ Guruh nomi juda qisqa.",
         'group name is too long': "⚠️ Guruh nomi juda uzun.",
+        'request join group': "Ushbu talaba <b>{group_name}</b> guruhga qo'shilmoqchi. Uni tasdiqlaysizmi?\n<a href='{link}'>{student_name}</a>"
     },
     LanguageChoices.ENGLISH: {
         'language flag': '🇺🇸',
@@ -70,5 +70,6 @@ messages = {
         'get group name': "Enter group name.\n<i>Example: 651-19</i>",
         'group name is too short': "⚠️ Group name is too short",
         'group name is too long': "⚠️ Group name is too long",
+        'request join group': "This student wants to join to <b>{group_name}</b>. Do you approve?\n<a href='{link}'>{student_name}</a>"
     },
 }
