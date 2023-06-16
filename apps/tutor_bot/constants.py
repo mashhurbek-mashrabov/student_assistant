@@ -10,6 +10,8 @@ class TutorBotSteps:
     EDIT_LANGUAGE = 2
     MAIN_MENU = 3
     GET_FULL_NAME = 4
+    GET_GROUPS = 5
+    GET_GROUP_NAME = 6
 
 
 class TutorCallbackData:
@@ -17,9 +19,12 @@ class TutorCallbackData:
     back_button = 'back_button'
     skip = 'skip'
     exception = 'exception'
+    approve_tutor = 'approve_tutor'
+    reject_tutor = 'reject_tutor'
 
 
 class TutorStatus(models.IntegerChoices):
-    PENDING = 1, 'Pending'
-    APPROVED = 2, 'Approved'
-    REJECTED = 3, 'Rejected'
+    NEW = 1, 'NEW'
+    PENDING = 2, 'Pending'
+    VERIFIED = 3, 'Verified'
+    REJECTED = 4, 'Rejected'

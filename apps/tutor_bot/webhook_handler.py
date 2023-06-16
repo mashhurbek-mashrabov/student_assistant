@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from telebot.util import content_type_media
 
-from tutor_bot.constants import TutorBotSteps
+from tutor_bot.constants import TutorBotSteps, TutorCallbackData
 from tutor_bot.controllers.main import BotController
 from tutor_bot.loader import bot
 from common.utils import send_exception
@@ -46,17 +46,36 @@ def message_handler(message):
             controller.back_reply_button_handler()
         elif message_text == f"{controller.t('language flag')} {controller.t('change language')}":
             controller.list_language()
+        elif message_text == controller.t('groups'):
+            controller.get_groups()
+        elif message_text == controller.t('add group'):
+            controller.get_group_name()
         elif user_step == TutorBotSteps.LISTING_LANGUAGE:
             controller.set_language()
         elif user_step == TutorBotSteps.GET_FULL_NAME:
             controller.set_full_name()
+        elif user_step == TutorBotSteps.GET_GROUP_NAME:
+            controller.create_student_group()
     except:
         send_exception(traceback.format_exc(), 'start_handler', user=message.from_user)
 
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handler(message):
-    pass
+    controller = BotController(message, bot)
+    user_step = controller.step
+    callback_data = message.data
+    try:
+        if callback_data == TutorCallbackData.main_menu_button:
+            controller.main_menu(edit_message=True)
+        elif callback_data.startswith(TutorCallbackData.back_button):
+            controller.back_inline_button_handler()
+        elif callback_data.startswith(TutorCallbackData.approve_tutor):
+            controller.approve_tutor()
+        elif callback_data.startswith(TutorCallbackData.reject_tutor):
+            controller.reject_tutor()
+    except:
+        send_exception(traceback.format_exc(), 'callback_handler', user=message.from_user)
 
 
 @bot.message_handler(func=lambda message: True, content_types=content_type_media)

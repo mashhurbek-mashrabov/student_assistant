@@ -1,8 +1,10 @@
-from telebot.types import KeyboardButton
+from telebot.types import KeyboardButton, InlineKeyboardButton
 
-from common.constants import LanguageChoices
-from tutor_bot.constants import TutorBotSteps
+from common.constants import LanguageChoices, MODERATOR_CHANNEL_ID
+from tutor_bot.constants import TutorBotSteps, TutorStatus
 from tutor_bot.controllers.base import BaseController
+from tutor_bot.models import TutorTelegramUser
+from tutor_bot.tasks import send_tutor_verification_to_admin
 
 
 class BotController(BaseController):
@@ -21,6 +23,8 @@ class BotController(BaseController):
 
         if step == TutorBotSteps.GET_FULL_NAME:
             self.list_language()
+        elif step == TutorBotSteps.GET_GROUP_NAME:
+            self.get_groups()
 
     def back_inline_button_handler(self):
         pass
@@ -45,7 +49,7 @@ class BotController(BaseController):
         self.user.save()
         self.main_menu(text=self.t('saved your language'))
 
-    def main_menu(self, text: str = None):
+    def main_menu(self, text: str = None, edit_message: bool = False):
         if self.user.full_name is None:
             if text:
                 self.send_message(message_text=text)
@@ -54,7 +58,13 @@ class BotController(BaseController):
         markup = self.reply_markup()
         markup.add(KeyboardButton(text=self.t('groups')))
         markup.add(KeyboardButton(text=f"{self.t('language flag')} {self.t('change language')}"))
+        if edit_message:
+            self.delete_message(message_id=self.callback_query_id)
         self.send_message(message_text=text or self.t('main menu'), reply_markup=markup)
+        if self.user.status == TutorStatus.NEW:
+            send_tutor_verification_to_admin.delay(self.user.id)
+            self.send_message(message_code='verification sent')
+            self.user.status = TutorStatus.PENDING
         self.set_step(TutorBotSteps.MAIN_MENU)
 
     def get_full_name(self, text: str = None):
@@ -74,3 +84,60 @@ class BotController(BaseController):
         self.user.full_name = full_name
         self.user.save()
         self.main_menu(text=self.t('saved'))
+
+    def get_groups(self, text: str = None):
+        if not self.user.is_verified:
+            self.main_menu(text=self.t('you ware not verified'))
+            return
+        markup = self.reply_markup()
+        groups = self.user.student_groups.all().order_by('name')
+        for i in groups:
+            markup.add(KeyboardButton(text=i.name))
+        markup.add(self.main_menu_reply_button, KeyboardButton(text=self.t('add group')))
+        self.send_message(message_text=text or self.t('get groups'), reply_markup=markup)
+        self.set_step(TutorBotSteps.GET_GROUPS)
+
+    def approve_tutor(self):
+        try:
+            user_id = self.callback_data.split(':')[1]
+            user = TutorTelegramUser.objects.get(id=user_id)
+            user.status = TutorStatus.VERIFIED
+            user.save()
+            markup = self.inline_markup()
+            markup.add(InlineKeyboardButton(text=self.messages('approved'), callback_data='None'))
+            self.edit_message(chat_id=MODERATOR_CHANNEL_ID, message=self.message.message.html_text,
+                              message_id=self.callback_query_id, reply_markup=markup)
+            self.send_message(chat_id=user.chat_id, message_text=self.t('you are approved', user.language))
+        except Exception as e:
+            self.answer_callback(message=str(e), show_alert=True)
+
+    def reject_tutor(self):
+        try:
+            user_id = self.callback_data.split(':')[1]
+            user = TutorTelegramUser.objects.get(id=user_id)
+            user.status = TutorStatus.REJECTED
+            user.save()
+            markup = self.inline_markup()
+            markup.add(InlineKeyboardButton(text=self.messages('rejected'), callback_data='None'))
+            self.edit_message(chat_id=MODERATOR_CHANNEL_ID, message=self.message.message.html_text,
+                              message_id=self.callback_query_id, reply_markup=markup)
+            self.send_message(chat_id=user.chat_id, message_text=self.t('you are rejected', user.language))
+        except Exception as e:
+            self.answer_callback(message=str(e), show_alert=True)
+
+    def get_group_name(self, text: str = None):
+        markup = self.reply_markup()
+        markup.add(self.main_menu_reply_button, self.back_reply_button)
+        self.send_message(message_text=text or self.t('get group name'), reply_markup=markup)
+        self.set_step(TutorBotSteps.GET_GROUP_NAME)
+
+    def create_student_group(self):
+        group_name = self.message_text
+        if len(group_name) < 3:
+            self.get_group_name(text=self.t('group name is too short'))
+            return
+        elif len(group_name) > 15:
+            self.get_group_name(text=self.t('group name is too long'))
+            return
+        self.user.student_groups.create(name=group_name)
+        self.get_groups(text=self.t('saved'))
