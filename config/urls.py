@@ -25,7 +25,7 @@ from tutor_bot.constants import TUTOR_WEBHOOK_URL
 from tutor_bot.webhook_handler import tutor_webhook_handler
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('tatu/admin/', admin.site.urls),
     path(STUDENT_WEBHOOK_URL, student_webhook_handler),
     path(TUTOR_WEBHOOK_URL, tutor_webhook_handler),
 ]
